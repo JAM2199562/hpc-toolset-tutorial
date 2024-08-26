@@ -11,7 +11,9 @@ SLURM_VERSION=${SLURM_VERSION:-21.08.8-2}
 WEBSOCKIFY_VERSION=${WEBSOCKIFY_VERSION:-0.11.0}
 ARCHTYPE=`uname -m`
 
+curl -o /etc/yum.repos.d/turbovnc.repo https://raw.githubusercontent.com/TurboVNC/repo/main/TurboVNC.repo
 dnf install -y turbovnc 
+
 
 log_info "Compiling python-websockify version ${WEBSOCKIFY_VERSION}.."
 wget -O /tmp/websockify-${WEBSOCKIFY_VERSION}.tar.gz https://github.com/novnc/websockify/archive/refs/tags/v${WEBSOCKIFY_VERSION}.tar.gz
