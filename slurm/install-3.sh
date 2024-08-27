@@ -19,8 +19,8 @@ wget -O /tmp/websockify-${WEBSOCKIFY_VERSION}.tar.gz https://github.com/novnc/we
 pushd /tmp
 tar xzf websockify-${WEBSOCKIFY_VERSION}.tar.gz
 pushd websockify-${WEBSOCKIFY_VERSION}
-sed -i 's/numpy/numpy==1.26/' setup.py
 python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+sed -i 's/numpy/numpy==1.26/' setup.py
 python3 setup.py install
 popd
 rm -rf /tmp/websockify*

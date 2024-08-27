@@ -1,18 +1,19 @@
 ARG HPCTS_VERSION=latest
 
-FROM --platform=linux/amd64 ubccr/hpcts:base-${HPCTS_VERSION} as stage-amd64
+FROM --platform=linux/amd64 ubccr/hpcts:base-${HPCTS_VERSION} AS stage-amd64
 
-FROM --platform=linux/arm64 ubccr/hpcts:base-${HPCTS_VERSION} as stage-arm64
+FROM --platform=linux/arm64 ubccr/hpcts:base-${HPCTS_VERSION} AS stage-arm64
 
 ARG TARGETARCH
 
-FROM stage-${TARGETARCH} as final
+FROM stage-${TARGETARCH} AS final
 
 ARG SLURM_VERSION
 COPY . /build
-RUN /build/install-1.sh 
-#RUN /build/install-2.sh 
-RUN /build/install-3.sh && rm -rf /build
+#RUN /build/install-1.sh 
+RUN /build/install-2.sh 
+RUN /build/install-3.sh 
+RUN /build/install-4.sh && rm -rf /build
 COPY slurm.conf /etc/slurm/slurm.conf
 COPY --chown=slurm:slurm slurmdbd.conf /etc/slurm/slurmdbd.conf
 RUN chmod 600 /etc/slurm/slurmdbd.conf
