@@ -10,9 +10,9 @@ FROM stage-${TARGETARCH} as final
 
 ARG SLURM_VERSION
 COPY . /build
-RUN /build/install.sh 
 RUN /build/install-1.sh 
-RUN /build/install-2.sh && rm -rf /build
+#RUN /build/install-2.sh 
+RUN /build/install-3.sh && rm -rf /build
 COPY slurm.conf /etc/slurm/slurm.conf
 COPY --chown=slurm:slurm slurmdbd.conf /etc/slurm/slurmdbd.conf
 RUN chmod 600 /etc/slurm/slurmdbd.conf
