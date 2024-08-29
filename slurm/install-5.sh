@@ -17,7 +17,7 @@ python3 -m venv --without-pip --prompt jupyter/2.1.4 /usr/local/jupyter/2.1.4
 source /usr/local/jupyter/2.1.4/bin/activate
 curl https://bootstrap.pypa.io/get-pip.py | python
 
-pip install jupyterlab==2.1.4 jupyter-console qtconsole ipywidgets plotly==4.8.2 pandas scikit-learn numpy
+python3 -m pip install jupyterlab==2.1.4 jupyter-console qtconsole ipywidgets plotly==4.8.2 pandas scikit-learn numpy
 deactivate
 
 dnf clean all

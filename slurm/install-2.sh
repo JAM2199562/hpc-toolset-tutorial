@@ -10,13 +10,6 @@ log_info() {
 SLURM_VERSION=${SLURM_VERSION:-21.08.8-2}
 WEBSOCKIFY_VERSION=${WEBSOCKIFY_VERSION:-0.11.0}
 ARCHTYPE=`uname -m`
-sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-    -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.ustc.edu.cn/rocky|g' \
-    -i.bak \
-    /etc/yum.repos.d/Rocky-AppStream.repo \
-    /etc/yum.repos.d/Rocky-BaseOS.repo \
-    /etc/yum.repos.d/Rocky-Extras.repo \
-    /etc/yum.repos.d/Rocky-PowerTools.repo
 
 log_info "Installing required packages for building slurm.."
 dnf -y install dnf-plugins-core

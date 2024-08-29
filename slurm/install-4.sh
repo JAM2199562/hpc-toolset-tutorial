@@ -12,13 +12,58 @@ WEBSOCKIFY_VERSION=${WEBSOCKIFY_VERSION:-0.11.0}
 ARCHTYPE=`uname -m`
 
 
-log_info "Installing Jupyter.."
-python3 -m venv --without-pip --prompt jupyter/2.1.4 /usr/local/jupyter/2.1.4
-source /usr/local/jupyter/2.1.4/bin/activate
-curl https://bootstrap.pypa.io/get-pip.py | python
+log_info "Compiling slurm version ${SLURM_VERSION}.."
+curl -o /tmp/slurm-${SLURM_VERSION}.tar.bz2 https://download.schedmd.com/slurm/slurm-${SLURM_VERSION}.tar.bz2
+pushd /tmp
+tar xf slurm-${SLURM_VERSION}.tar.bz2
+pushd slurm-${SLURM_VERSION}
+./configure --prefix=/usr --sysconfdir=/etc/slurm 
+make -j4
+make install
+install -D -m644 etc/cgroup.conf.example /etc/slurm/cgroup.conf.example
+install -D -m644 etc/slurm.conf.example /etc/slurm/slurm.conf.example
+install -D -m644 etc/slurmdbd.conf.example /etc/slurm/slurmdbd.conf.example
+install -D -m644 contribs/slurm_completion_help/slurm_completion.sh /etc/profile.d/slurm_completion.sh
+popd
+rm -rf /tmp/slurm*
 
-pip install jupyterlab==2.1.4 jupyter-console qtconsole ipywidgets plotly==4.8.2 pandas scikit-learn numpy
-deactivate
+log_info "Creating slurm user account.."
+groupadd -r --gid=1000 slurm
+useradd -r -g slurm --uid=1000 slurm
 
-dnf clean all
-rm -rf /var/cache/dnf
+log_info "Setting up slurm directories.."
+mkdir /etc/sysconfig/slurm \
+    /var/spool/slurmd \
+    /var/run/slurmd \
+    /var/run/slurmdbd \
+    /var/lib/slurmd \
+    /var/log/slurm \
+    /data
+
+touch /var/lib/slurmd/node_state \
+    /var/lib/slurmd/front_end_state \
+    /var/lib/slurmd/job_state \
+    /var/lib/slurmd/resv_state \
+    /var/lib/slurmd/trigger_state \
+    /var/lib/slurmd/assoc_mgr_state \
+    /var/lib/slurmd/assoc_usage \
+    /var/lib/slurmd/qos_usage \
+    /var/lib/slurmd/fed_mgr_state
+
+chown -R slurm:slurm /var/*/slurm*
+
+log_info "Creating munge key.."
+/sbin/create-munge-key
+
+log_info "Installing performance data collection software.."
+dnf install -y pcp
+
+mkdir -p /run/pcp
+ln -s /usr/lib/systemd/system/pmlogger.service /etc/systemd/system/multi-user.target.wants/pmlogger.service
+
+log_info "Setting PCP defaults suitable for running in a container.."
+echo -e "# Disable Avahi (since it does not run inside the containers)\n-A" >> /etc/pcp/pmcd/pmcd.options
+
+log_info "Configuring PCP logger with suitable container defaults.."
+sed -i 's#^LOCALHOSTNAME.*$#LOCALHOSTNAME   y   n   "/home/pcp/$(date +%Y)/$(date +%m)/LOCALHOSTNAME/$(date +%Y)-$(date +%m)-$(date +%d)"   -r -c /etc/pcp/pmlogger/pmlogger-supremm.config#' /etc/pcp/pmlogger/control.d/local
+
